@@ -28,40 +28,45 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Hero Slider
-    const heroSlides = document.querySelectorAll('.hero-slide');
-    let currentSlide = 0;
-    let slideInterval = null;
-    
-    function showSlide(index) {
-        // Validate index is within bounds
-        if (index < 0 || index >= heroSlides.length) {
-            console.warn('Invalid slide index:', index);
-            index = 0; // Reset to first slide if invalid
+    function initializeHeroSlider() {
+        // Get all slides
+        const heroSlides = document.querySelectorAll('.hero-slide');
+        if (!heroSlides.length) return; // Exit if no slides exist
+        
+        let currentSlide = 0;
+        let slideInterval = null;
+        
+        // Function to display a specific slide
+        function showSlide(index) {
+            // Ensure the index is valid
+            if (index < 0) index = heroSlides.length - 1;
+            if (index >= heroSlides.length) index = 0;
+            
+            // Update current slide index
+            currentSlide = index;
+            
+            // Hide all slides
+            heroSlides.forEach(slide => {
+                slide.classList.remove('active');
+                slide.style.display = 'none';
+            });
+            
+            // Show the current slide
+            heroSlides[currentSlide].classList.add('active');
+            heroSlides[currentSlide].style.display = 'block';
         }
         
-        // Remove active class from all slides
-        heroSlides.forEach(slide => slide.classList.remove('active'));
+        // Function to move to the next slide
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
         
-        // Add active class to current slide
-        heroSlides[index].classList.add('active');
-    }
-    
-    function nextSlide() {
-        currentSlide = (currentSlide + 1) % heroSlides.length;
-        showSlide(currentSlide);
-    }
-    
-    function prevSlide() {
-        currentSlide = (currentSlide - 1 + heroSlides.length) % heroSlides.length;
-        showSlide(currentSlide);
-    }
-    
-    // Initialize slider if slides exist
-    if (heroSlides.length > 0) {
-        // Start automatic sliding
-        slideInterval = setInterval(nextSlide, 5000);
+        // Function to move to the previous slide
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
         
-        // Add manual controls
+        // Set up slide indicators and nav controls
         const hero = document.querySelector('.hero');
         if (hero) {
             // Create navigation arrows
@@ -75,26 +80,78 @@ document.addEventListener('DOMContentLoaded', function() {
             navNext.innerHTML = '<i class="fas fa-chevron-right"></i>';
             navNext.setAttribute('aria-label', 'Next slide');
             
-            // Add event listeners
-            navPrev.addEventListener('click', function() {
+            // Add event listeners for navigation
+            navPrev.addEventListener('click', function(e) {
+                e.preventDefault();
                 prevSlide();
-                // Reset interval to prevent quick slide change after manual navigation
-                clearInterval(slideInterval);
-                slideInterval = setInterval(nextSlide, 5000);
+                resetTimer();
             });
             
-            navNext.addEventListener('click', function() {
+            navNext.addEventListener('click', function(e) {
+                e.preventDefault();
                 nextSlide();
-                // Reset interval to prevent quick slide change after manual navigation
-                clearInterval(slideInterval);
-                slideInterval = setInterval(nextSlide, 5000);
+                resetTimer();
             });
             
-            // Append to hero section
+            // Add nav controls to the hero
             hero.appendChild(navPrev);
             hero.appendChild(navNext);
+            
+            // Create slide indicators
+            const indicators = document.createElement('div');
+            indicators.className = 'hero-indicators';
+            
+            // Create an indicator for each slide
+            heroSlides.forEach((_, index) => {
+                const dot = document.createElement('button');
+                dot.className = 'hero-indicator';
+                dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+                
+                // Add event listener for each indicator
+                dot.addEventListener('click', function() {
+                    showSlide(index);
+                    resetTimer();
+                });
+                
+                indicators.appendChild(dot);
+            });
+            
+            // Add indicators to the hero
+            hero.appendChild(indicators);
+            
+            // Update indicators when slide changes
+            function updateIndicators() {
+                const dots = indicators.querySelectorAll('.hero-indicator');
+                dots.forEach((dot, index) => {
+                    if (index === currentSlide) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Override showSlide to also update indicators
+            const originalShowSlide = showSlide;
+            showSlide = function(index) {
+                originalShowSlide(index);
+                updateIndicators();
+            };
         }
+        
+        // Reset the automatic sliding timer
+        function resetTimer() {
+            clearInterval(slideInterval);
+            slideInterval = setInterval(nextSlide, 5000);
+        }
+        
+        // Initialize slider
+        showSlide(0); // Start with the first slide
+        slideInterval = setInterval(nextSlide, 5000); // Auto-advance slides
     }
+    
+    // Initialize the slider
+    initializeHeroSlider();
     
     // Gallery Filter
     const filterBtns = document.querySelectorAll('.filter-btn');
