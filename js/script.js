@@ -207,10 +207,47 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 7000);
     }
     
-    // Artwork Modal
+    // Artwork Modal with responsive improvements
     const viewArtworkBtns = document.querySelectorAll('.view-artwork-btn');
     const artworkModal = document.getElementById('artworkModal');
     const modalClose = document.querySelector('.modal-close');
+    
+    // Handle modal scroll behavior
+    function lockScroll() {
+        document.body.style.overflow = 'hidden';
+        document.body.style.paddingRight = getScrollbarWidth() + 'px';
+    }
+    
+    function unlockScroll() {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
+    
+    // Calculate scrollbar width to prevent layout shift when opening modal
+    function getScrollbarWidth() {
+        const outer = document.createElement('div');
+        outer.style.visibility = 'hidden';
+        outer.style.width = '100px';
+        outer.style.overflow = 'scroll';
+        document.body.appendChild(outer);
+        
+        const inner = document.createElement('div');
+        inner.style.width = '100%';
+        outer.appendChild(inner);
+        
+        const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
+        outer.parentNode.removeChild(outer);
+        
+        return scrollbarWidth;
+    }
+    
+    // Ensure modal can be closed with escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && artworkModal.classList.contains('active')) {
+            artworkModal.classList.remove('active');
+            unlockScroll();
+        }
+    });
     
     // Artwork details for modal (in a real implementation, this would come from a database)
     const artworkDetails = {
@@ -1146,9 +1183,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
                     }
                     
-                    // Show modal
+                    // Show modal with improved transition
                     artworkModal.classList.add('active');
-                    document.body.style.overflow = 'hidden'; // Prevent scrolling
+                    lockScroll(); // Prevent scrolling with our enhanced function
+                    
+                    // Adjust focus for accessibility
+                    setTimeout(() => {
+                        modalClose.focus();
+                    }, 100);
                 }
             });
         });
@@ -1156,16 +1198,40 @@ document.addEventListener('DOMContentLoaded', function() {
         if (modalClose) {
             modalClose.addEventListener('click', function() {
                 artworkModal.classList.remove('active');
-                document.body.style.overflow = ''; // Restore scrolling
+                unlockScroll(); // Restore scrolling with our enhanced function
             });
             
             // Close modal if clicking outside content
             artworkModal.addEventListener('click', function(e) {
                 if (e.target === artworkModal) {
                     artworkModal.classList.remove('active');
-                    document.body.style.overflow = ''; // Restore scrolling
+                    unlockScroll(); // Restore scrolling with our enhanced function
                 }
             });
+            
+            // Add swipe support for mobile
+            let touchStartY = 0;
+            let touchEndY = 0;
+            
+            const modalContent = artworkModal.querySelector('.modal-content');
+            
+            modalContent.addEventListener('touchstart', function(e) {
+                touchStartY = e.changedTouches[0].screenY;
+            }, false);
+            
+            modalContent.addEventListener('touchend', function(e) {
+                touchEndY = e.changedTouches[0].screenY;
+                handleSwipe();
+            }, false);
+            
+            function handleSwipe() {
+                const swipeDistance = touchEndY - touchStartY;
+                // If swiped down significantly on a mobile device
+                if (swipeDistance > 100 && window.innerWidth <= 768) {
+                    artworkModal.classList.remove('active');
+                    unlockScroll();
+                }
+            }
         }
     }
     
