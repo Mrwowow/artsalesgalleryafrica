@@ -860,7 +860,10 @@ document.addEventListener('DOMContentLoaded', function() {
             nationality: 'Nigeria',
             image: 'images/aboutpic.jpg',
             bio: `<p>Chidozie Oliver Maduka is a Nigerian fine art photographer and visual storyteller whose lens captures more than just images—it captures soul, silence, memory, and meaning. A graduate of Civil Engineering from Kwara State University (Class of 2021), Chidozie's artistic journey runs parallel to his academic pursuit.</p>
-                  <p>In 2020, while still in university, Chidozie formally began his career as a fine art photographer. With a style deeply grounded in cultural memory and emotional resonance, topics like identity, ancestral memory, hope, silence, displacement, and dreams feature as constant subjects in his works.</p>`,
+                  <p>In 2020, while still in university, Chidozie formally began his career as a fine art photographer. With a style deeply grounded in cultural memory and emotional resonance, topics like identity, ancestral memory, hope, silence, displacement, and dreams feature as constant subjects in his works.</p>
+                  <p>La Mode Awards 2021 as top rising fine art photographer</p>
+                  <p>Icon Touch Awards 2022 Emerging Artist of the Year</p>
+                  <p>African Icon Award 2024 as young fine art photographer of the year.</p>`,
             stats: {
                 exhibitions: '12+',
                 collections: '6',
